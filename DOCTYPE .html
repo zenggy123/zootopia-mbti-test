@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>疯狂动物城MBTI性格测试</title>
+    <style>
+        body {
+            font-family: 'Arial Rounded MT Bold', 'Arial', sans-serif;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: #333;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 0 #ff9f1a;
+        }
+        .question {
+            margin: 30px 0;
+            padding: 20px;
+            border-left: 5px solid #3498db;
+            background: #f8f9fa;
+            border-radius: 10px;
+            display: none; /* 默认隐藏所有问题 */
+        }
+        .question.active {
+            display: block; /* 仅显示active的问题 */
+            animation: fadeIn 0.5s;
+        }
+        .question h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        .option {
+            margin: 15px 0;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+        }
+        .option:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .option.selected {
+            border-color: #3498db;
+            background: #e3f2fd;
+        }
+        .option-A.selected {
+            border-color: #2ecc71;
+            background: #d5f4e6;
+        }
+        .option-B.selected {
+            border-color: #e74c3c;
+            background: #fadbd8;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 30px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+            transition: all 0.3s;
+        }
+        .button:hover {
+            background: #2980b9;
+            transform: scale(1.05);
+        }
+        .button.disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+        }
+        .result {
+            display: none;
+            text-align: center;
+            padding: 30px;
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            border-radius: 15px;
+            color: white;
+            margin-top: 30px;
+        }
+        .result h2 {
+            font-size: 2em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+        }
+        .character-card {
+            background: white;
+            color: #333;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px auto;
+            max-width: 500px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .character-image-container {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 5px solid #3498db;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+            background: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .character-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+        .character-image:hover {
+            transform: scale(1.05);
+        }
+        .image-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #3498db;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .traits-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .trait-badge {
+            background: #3498db;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+        .download-btn {
+            display: inline-block;
+            background: #2ecc71;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            margin-top: 15px;
+            transition: all 0.3s;
+        }
+        .download-btn:hover {
+            background: #27ae60;
+            transform: translateY(-3px);
+        }
+        .progress-bar {
+            height: 10px;
+            background: #ecf0f1;
+            border-radius: 5px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, #2ecc71, #3498db);
+            width: 0%;
+            transition: width 0.5s;
+        }
+        .mbti-letter {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            line-height: 40px;
+            text-align: center;
+            background: #2c3e50;
+            color: white;
+            border-radius: 50%;
+            margin: 0 5px;
+            font-weight: bold;
+        }
+        .mbti-letter.active {
+            background: #e74c3c;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>疯狂动物城MBTI性格测试</h1>
+        
+        <div class="progress-bar">
+            <div class="progress" id="progress"></div>
+        </div>
+        
+        <div class="mbti-indicator">
+            <span class="mbti-letter" id="letter1">E/I</span>
+            <span class="mbti-letter" id="letter2">S/N</span>
+            <span class="mbti-letter" id="letter3">T/F</span>
+            <span class="mbti-letter" id="letter4">J/P</span>
+        </div>
+        
+        <!-- 问题1：默认添加active类，确保初始显示 -->
+        <div id="question1" class="question active">
+            <h3>问题1：动物城警局举办了一场大型联谊会，旨在促进不同部门之间的交流。你会？</h3>
+            <div class="option option-A" data-question="1" data-value="E">
+                A. 积极参与，主动结识新朋友，在人群中感到兴奋。
+            </div>
+            <div class="option option-B" data-question="1" data-value="I">
+                B. 只和熟悉的同事聊天，或者找借口提前离开，觉得这样的场合耗神。
+            </div>
+        </div>
+        
+        <div id="question2" class="question">
+            <h3>问题2：在调查"午夜嚎叫"案件时，你更擅长：</h3>
+            <div class="option option-A" data-question="2" data-value="S">
+                A. 仔细检查监控录像，记录每个受害者的具体症状和时间线，关注事实细节。
+            </div>
+            <div class="option option-B" data-question="2" data-value="N">
+                B. 将看似不相关的线索联系起来，推测背后有一个巨大的阴谋。
+            </div>
+        </div>
+        
+        <div id="question3" class="question">
+            <h3>问题3：你的朋友尼克因为童年阴影而不敢承认自己的梦想，你会如何帮助他？</h3>
+            <div class="option option-A" data-question="3" data-value="T">
+                A. 用逻辑说服他，指出他的能力所在，并制定切实可行的计划来实现梦想。
+            </div>
+            <div class="option option-B" data-question="3" data-value="F">
+                B. 表达情感上的支持，告诉他你相信他，并鼓励他正视自己的内心。
+            </div>
+        </div>
+        
+        <div id="question4" class="question">
+            <h3>问题4：你被任命策划动物城一年一度的"野生动物博览会"。你的工作风格是：</h3>
+            <div class="option option-A" data-question="4" data-value="J">
+                A. 提前数月制定详细计划，分配任务，设置检查点，确保一切按部就班。
+            </div>
+            <div class="option option-B" data-question="4" data-value="P">
+                B. 先确定大方向，然后随着筹备进展灵活调整，预留空间给创意和突发灵感。
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px;">
+            <button class="button" id="prevBtn" disabled>上一题</button>
+            <button class="button" id="nextBtn">下一题</button>
+            <button class="button disabled" id="submitBtn" disabled>查看结果</button>
+            <button class="button" id="resetBtn">重新开始</button>
+        </div>
+        
+        <div id="result" class="result">
+            <h2>你的动物城性格是：<span id="mbtiType" class="pulse"></span></h2>
+            
+            <div id="characterCard" class="character-card">
+                <div class="character-image-container">
+                    <img id="characterImage" class="character-image" src="" alt="角色形象" onerror="this.onerror=null; this.style.display='none'; document.getElementById('imagePlaceholder').style.display='flex';">
+                    <div id="imagePlaceholder" class="image-placeholder" style="display: none;">
+                        <span id="placeholderText">角色</span>
+                    </div>
+                </div>
+                
+                <h3 id="characterName"></h3>
+                <div class="traits-container" id="traitsContainer"></div>
+                <p id="characterDesc"></p>
+                <p id="yourTypeDesc"></p>
+                <a href="#" id="downloadLink" class="download-btn" download="动物城性格报告.png">保存我的结果</a>
+            </div>
+            
+            <button class="button" id="shareBtn">分享结果</button>
+            <button class="button" id="compareBtn">看看其他类型</button>
+        </div>
+    </div>
+    <script>
+        // MBTI类型数据（图片URL已替换为网络地址）
+        const mbtiData = {
+            "ISTJ": {
+                name: "牛局长",
+                desc: "可靠务实，坚守职责，是动物城秩序的坚定维护者。",
+                traits: ["严谨认真", "重视规则", "可靠支柱", "言出必行"],
+                image: "C:\\Users\\52585\\Desktop\\52fa1acbabf6cca1d16fc29edb509cd4.jpg",
+                color: "#3498db"
+            },
+            "ISFJ": {
+                name: "朱迪的父母",
+                desc: "忠诚体贴，保护他人，关心家庭和社区的和谐。",
+                traits: ["善良体贴", "重视传统", "默默支持", "温暖可靠"],
+                image: "C:\\Users\\52585\\Desktop\\502f09e5fa5f1dd7d0e58318a8115952.jpg",
+                color: "#9b59b6"
+            },
+            "INFJ": {
+                name: "羊副市长",
+                desc: "富有洞察力，善于谋划，为了理想可以制定长远计划。",
+                traits: ["思想深邃", "理想主义", "善于谋划", "温柔坚定"],
+                image: "C:\\Users\\52585\\Desktop\\4c1df11760ff806656535cb100e1255e.jpg",
+                color: "#1abc9c"
+            },
+            "INTJ": {
+                name: "狮子市长",
+                desc: "战略家，独立果断，善于掌控大局和权衡利弊。",
+                traits: ["目标明确", "善于规划", "宏观思考", "决策果断"],
+                image: "C:\\Users\\52585\\Desktop\\6d6dbb7302ffb678f79609a59c84daf1.jpg",
+                color: "#e67e22"
+            },
+            "ISTP": {
+                name: "尼克·王尔德",
+                desc: "灵活冷静，街头智慧丰富，擅长随机应变和解决实际问题。",
+                traits: ["冷静理性", "动手能力强", "机智灵活", "实用主义"],
+                image:"C:\\Users\\52585\\Desktop\\29bf43dd1834762c1634027a0be40176.jpg",
+                color: "#e74c3c"
+            },
+            "ISFP": {
+                name: "闪电",
+                desc: "温和友善，享受当下，按照自己的节奏从容生活。",
+                traits: ["随和友善", "享受当下", "从容不迫", "审美力强"],
+                image: "C:\\Users\\52585\\Desktop\\fe332e8451a16d57ea44878c70d090cc.jpg",
+                color: "#f39c12"
+            },
+            "INFP": {
+                name: "朱迪·霍普斯（初心）",
+                desc: "理想主义，忠于内心，坚持梦想并富有同情心。",
+                traits: ["理想主义", "忠于内心", "富有同情", "真诚待人"],
+                image: "C:\\Users\\52585\Desktop\\9cac2e8d1ff70352d8d39adb00fb9b98.jpg",
+                color: "#2ecc71"
+            },
+            "INTP": {
+                name: "尼克",
+                desc: "逻辑分析者，好奇创新，理性思考。",
+                traits: ["好奇心强", "逻辑分析", "探索精神", "理性思考"],
+                image: "C:\\Users\\52585\\Desktop\\f26dc67d90419472fad0152eb8e5c6c4.jpg",
+                color: "#34495e"
+            },
+            "ESTP": {
+                name: "杜克·威斯顿",
+                desc: "冒险家，活跃务实，行动迅速且善于把握机会。",
+                traits: ["行动力强", "适应力好", "善于把握", "享受冒险"],
+                image: "C:\\Users\\52585\\Desktop\\625960046b52a08c02acceea782f0b69.jpg",
+                color: "#d35400"
+            },
+            "ESFP": {
+                name: "夏奇羊",
+                desc: "热情开朗，魅力四射，天生擅长带动气氛和享受舞台。",
+                traits: ["活泼热情", "善于社交", "魅力四射", "带动气氛"],
+                image: "C:\\Users\\52585\Desktop\\91fce35f09485e08bdc93aea4395054f.jpg",
+                color: "#8e44ad"
+            },
+            "ENFP": {
+                name: "朱迪·霍普斯",
+                desc: "充满灵感，激励他人，用乐观积极感染周围的人。",
+                traits: ["热情洋溢", "充满创意", "乐观积极", "激励他人"],
+                image: "C:\\Users\\52585\\Desktop\\b57b3d0b323138a34f8d3d8405f74741.jpg",
+                color: "#f1c40f"
+            },
+            "ENTP": {
+                name: "尼克（机智面）",
+                desc: "机智幽默，挑战常规，善于周旋和打破思维框架。",
+                traits: ["聪明机智", "喜欢辩论", "视角独特", "打破常规"],
+                image: "C:\\Users\\52585\\Desktop\\d05958bd07ccbf49ccc97ddae561d5c5.jpg",
+                color: "#16a085"
+            },
+            "ESTJ": {
+                name: "牛局长（执行面）",
+                desc: "高效组织者，雷厉风行，强调纪律和注重结果。",
+                traits: ["执行力强", "善于组织", "强调纪律", "注重结果"],
+                image: "C:\\Users\\52585\\Desktop\\37ea820dbd78712b153c50eebdd2ae1e.jpg",
+                color: "#2980b9"
+            },
+            "ESFJ": {
+                name: "动物城居民代表",
+                desc: "合作协调，乐于助人，具有强烈的社区精神和和谐意识。",
+                traits: ["善于合作", "关心他人", "社区精神", "维护和谐"],
+                image: "C:\\Users\\52585\\Desktop\\d0208573ffb5ee9c4ec65d0337074573.jpg",
+                color: "#c0392b"
+            },
+            "ENFJ": {
+                name: "朱迪（领袖特质）",
+                desc: "富有魅力，引导他人，能够鼓舞人心并推动改变。",
+                traits: ["善于激励", "同理心强", "富有魅力", "自然领导"],
+                image: "C:\\Users\\52585\\Desktop\\80d74617d28625f691a2859ae0742c35.jpg",
+                color: "#27ae60"
+            },
+            "ENTJ": {
+                name: "狮子市长（领导面）",
+                desc: "强势领导，统筹全局，目标导向且决策果断。",
+                traits: ["果断坚决", "善于规划", "目标导向", "统筹全局"],
+                image:"C:\\Users\\52585\\Desktop\\581f32e71bfc1a4803786211aa8f4c0d.jpg" ,
+                color: "#e74c3c"
+            }
+        };
+        // 备用图片（网络可访问地址）
+        const fallbackImages = {
+            "ISTJ": "https://images.unsplash.com/photo-1560969184-10fe8719e047?w=400&h=400&fit=crop",
+            "ISFJ": "https://images.unsplash.com/photo-1543852786-1cf6624b9987?w=400&h=400&fit=crop",
+            "INFJ": "https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=400&h=400&fit=crop",
+            "INTJ": "https://images.unsplash.com/photo-1560969184-10fe8719e047?w=400&h=400&fit=crop",
+            "ISTP": "https://images.unsplash.com/photo-1568152950565-f4bb15a772c5?w=400&h=400&fit=crop",
+            "ISFP": "https://images.unsplash.com/photo-1551085254-e96b210db58a?w=400&h=400&fit=crop",
+            "INFP": "https://images.unsplash.com/photo-1546182990-dffeafbe841d?w=400&h=400&fit=crop",
+            "INTP": "https://images.unsplash.com/photo-1537151625747-768eb6cf92b2?w=400&h=400&fit=crop",
+            "ESTP": "https://images.unsplash.com/photo-1568152950565-f4bb15a772c5?w=400&h=400&fit=crop",
+            "ESFP": "https://images.unsplash.com/photo-1551085254-e96b210db58a?w=400&h=400&fit=crop",
+            "ENFP": "https://images.unsplash.com/photo-1546182990-dffeafbe841d?w=400&h=400&fit=crop",
+            "ENTP": "https://images.unsplash.com/photo-1537151625747-768eb6cf92b2?w=400&h=400&fit=crop",
+            "ESTJ": "https://images.unsplash.com/photo-1560969184-10fe8719e047?w=400&h=400&fit=crop",
+            "ESFJ": "https://images.unsplash.com/photo-1543852786-1cf6624b9987?w=400&h=400&fit=crop",
+            "ENFJ": "https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=400&h=400&fit=crop",
+            "ENTJ": "https://images.unsplash.com/photo-1560969184-10fe8719e047?w=400&h=400&fit=crop",
+            "DEFAULT": "https://images.unsplash.com/photo-1546182990-dffeafbe841d?w=400&h=400&fit=crop"
+        };
+        let currentQuestion = 1;
+        let answers = {};
+        const totalQuestions = 4;
+
+        // 更新进度条
+        function updateProgress() {
+            const progress = (currentQuestion - 1) / totalQuestions * 100;
+            document.getElementById('progress').style.width = progress + '%';
+        }
+
+        // 更新字母指示器
+        function updateLetters() {
+            for (let i = 1; i <= 4; i++) {
+                const letter = document.getElementById(`letter${i}`);
+                if (i === currentQuestion) {
+                    letter.classList.add('active');
+                } else {
+                    letter.classList.remove('active');
+                }
+                
+                if (answers[i]) {
+                    letter.textContent = answers[i];
+                } else {
+                    // 重置为初始提示文本
+                    if (i === 1) letter.textContent = 'E/I';
+                    if (i === 2) letter.textContent = 'S/N';
+                    if (i === 3) letter.textContent = 'T/F';
+                    if (i === 4) letter.textContent = 'J/P';
+                }
+            }
+        }
+
+        // 显示指定问题（核心：强制给目标问题添加active类）
+        function showQuestion(questionNum) {
+            // 隐藏所有问题
+            document.querySelectorAll('.question').forEach(q => q.classList.remove('active'));
+            // 给目标问题添加active类，确保显示
+            const targetQuestion = document.getElementById(`question${questionNum}`);
+            if (targetQuestion) {
+                targetQuestion.classList.add('active');
+            }
+            
+            // 按钮状态控制
+            document.getElementById('prevBtn').disabled = (questionNum === 1);
+            document.getElementById('nextBtn').style.display = (questionNum === totalQuestions) ? 'none' : 'inline-block';
+            document.getElementById('submitBtn').style.display = (questionNum === totalQuestions) ? 'inline-block' : 'none';
+            
+            updateProgress();
+            updateLetters();
+        }
+
+        // 加载并显示图片
+        function loadCharacterImage(mbtiType) {
+            const imageElement = document.getElementById('characterImage');
+            const placeholder = document.getElementById('imagePlaceholder');
+            const placeholderText = document.getElementById('placeholderText');
+            const data = mbtiData[mbtiType];
+            
+            imageElement.style.display = 'none';
+            placeholder.style.display = 'flex';
+            placeholderText.textContent = data.name.substring(0, 2);
+            
+            if (data && data.image) {
+                imageElement.src = data.image;
+                imageElement.onload = function() {
+                    imageElement.style.display = 'block';
+                    placeholder.style.display = 'none';
+                };
+                imageElement.onerror = function() {
+                    imageElement.src = fallbackImages[mbtiType] || fallbackImages.DEFAULT;
+                    imageElement.style.display = 'block';
+                    placeholder.style.display = 'none';
+                };
+                const container = document.querySelector('.character-image-container');
+                if (container && data.color) {
+                    container.style.borderColor = data.color;
+                    placeholder.style.background = data.color;
+                }
+            } else {
+                imageElement.src = fallbackImages.DEFAULT;
+                imageElement.style.display = 'block';
+                placeholder.style.display = 'none';
+            }
+        }
+
+        // 生成特质徽章
+        function generateTraitsBadges(traits) {
+            const container = document.getElementById('traitsContainer');
+            container.innerHTML = '';
+            if (traits && traits.length > 0) {
+                traits.forEach(trait => {
+                    const badge = document.createElement('div');
+                    badge.className = 'trait-badge';
+                    badge.textContent = trait;
+                    container.appendChild(badge);
+                });
+            }
+        }
+
+        // 选择选项
+        document.querySelectorAll('.option').forEach(option => {
+            option.addEventListener('click', function() {
+                const questionNum = parseInt(this.dataset.question);
+                const value = this.dataset.value;
+                
+                document.querySelectorAll(`.option[data-question="${questionNum}"]`).forEach(opt => opt.classList.remove('selected'));
+                this.classList.add('selected');
+                answers[questionNum] = value;
+                
+                const allAnswered = Object.keys(answers).length === totalQuestions;
+                document.getElementById('submitBtn').disabled = !allAnswered;
+                document.getElementById('submitBtn').classList.toggle('disabled', !allAnswered);
+            });
+        });
+
+        // 下一题
+        document.getElementById('nextBtn').addEventListener('click', function() {
+            if (currentQuestion < totalQuestions) {
+                currentQuestion++;
+                showQuestion(currentQuestion);
+            }
+        });
+
+        // 上一题
+        document.getElementById('prevBtn').addEventListener('click', function() {
+            if (currentQuestion > 1) {
+                currentQuestion--;
+                showQuestion(currentQuestion);
+            }
+        });
+
+        // 提交结果
+        document.getElementById('submitBtn').addEventListener('click', function() {
+            if (Object.keys(answers).length === totalQuestions) {
+                const mbtiType = 
+                    (answers[1] === 'E' ? 'E' : 'I') +
+                    (answers[2] === 'S' ? 'S' : 'N') +
+                    (answers[3] === 'T' ? 'T' : 'F') +
+                    (answers[4] === 'J' ? 'J' : 'P');
+                
+                // 隐藏所有问题
+                document.querySelectorAll('.question').forEach(q => q.classList.remove('active'));
+                // 显示结果
+                document.getElementById('result').style.display = 'block';
+                document.getElementById('mbtiType').textContent = mbtiType;
+                
+                const data = mbtiData[mbtiType];
+                if (data) {
+                    document.getElementById('characterName').textContent = `你的动物城角色：${data.name}`;
+                    document.getElementById('characterDesc').textContent = `角色特点：${data.desc}`;
+                    document.getElementById('yourTypeDesc').textContent = `性格解读：${data.traits.join('，')}`;
+                    loadCharacterImage(mbtiType);
+                    generateTraitsBadges(data.traits);
+                    
+                    const downloadLink = document.getElementById('downloadLink');
+                    downloadLink.onclick = function(e) {
+                        e.preventDefault();
+                        alert('由于浏览器安全限制，请截图保存您的结果！\n\n快捷键：\nWindows: Ctrl + Shift + S\nMac: Cmd + Shift + 4');
+                    };
+                }
+                
+                document.getElementById('progress').style.width = '100%';
+            }
+        });
+
+        // 重新开始（核心修复：强制重置并显示第一题）
+        document.getElementById('resetBtn').addEventListener('click', function() {
+            // 1. 重置当前问题为第1题
+            currentQuestion = 1;
+            // 2. 清空所有答案
+            answers = {};
+            // 3. 移除所有选项的选中状态
+            document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+            // 4. 禁用提交按钮
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('submitBtn').classList.add('disabled');
+            // 5. 隐藏结果区域
+            document.getElementById('result').style.display = 'none';
+            // 6. 强制显示第一个问题（调用showQuestion确保active类被添加）
+            showQuestion(1);
+        });
+
+        // 分享功能
+        document.getElementById('shareBtn').addEventListener('click', function() {
+            const mbtiType = document.getElementById('mbtiType').textContent;
+            const characterName = document.getElementById('characterName').textContent;
+            const text = `我在疯狂动物城MBTI测试中的结果是：${mbtiType} - ${characterName} 🦊\n\n你也来试试吧！`;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: '我的动物城MBTI测试结果',
+                    text: text,
+                    url: window.location.href
+                });
+            } else {
+                navigator.clipboard.writeText(text).then(() => {
+                    alert('结果已复制到剪贴板，快去分享给朋友吧！\n\n' + text);
+                });
+            }
+        });
+
+        // 查看其他类型
+        document.getElementById('compareBtn').addEventListener('click', function() {
+            let compareText = "🏙️ 动物城所有角色类型：\n\n";
+            Object.keys(mbtiData).forEach(type => {
+                compareText += `${type}: ${mbtiData[type].name}\n`;
+            });
+            compareText += "\n邀请朋友测试，看看你们的匹配度！";
+            alert(compareText);
+        });
+
+        // 初始化
+        updateProgress();
+        updateLetters();
+    </script>
+</body>
+</html>
